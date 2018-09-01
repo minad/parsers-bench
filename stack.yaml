@@ -1,6 +1,4 @@
-resolver: lts-10.0
+resolver: lts-12.4
 packages:
 - '.'
-extra-deps:
-- megaparsec-6.4.0
-- parser-combinators-0.4.0
+- '/home/mark/projects/programs/haskell/megaparsec'
