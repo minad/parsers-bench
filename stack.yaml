@@ -1,4 +1,5 @@
-resolver: lts-12.4
+resolver: nightly-2018-08-14
 packages:
 - '.'
-- '/home/mark/projects/programs/haskell/megaparsec'
+- '../megaparsec'
+- '../parparsec'

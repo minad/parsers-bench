@@ -47,7 +47,5 @@ escapedField =
     escapedDq  = label "escaped double-quote" (34 <$ string "\"\"")
 
 unescapedField :: Parser ByteString
-unescapedField = takeWhileP
-  (Just "unescaped char")
-  (`notElem` [44,34,10,13])
+unescapedField = takeWhileP (Just "unescaped char") (\c -> c /= 44 && c /= 34 && c /= 10 && c /= 13)
 {-# INLINE unescapedField #-}

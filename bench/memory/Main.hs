@@ -7,10 +7,13 @@ import Weigh
 import qualified Data.ByteString              as B
 import qualified ParsersBench.CSV.Attoparsec  as A
 import qualified ParsersBench.CSV.Megaparsec  as M
+import qualified ParsersBench.CSV.ParParsec    as U
 import qualified ParsersBench.Json.Attoparsec as A
 import qualified ParsersBench.Json.Megaparsec as M
+import qualified ParsersBench.Json.ParParsec   as U
 import qualified ParsersBench.Log.Attoparsec  as A
 import qualified ParsersBench.Log.Megaparsec  as M
+import qualified ParsersBench.Log.ParParsec    as U
 
 main :: IO ()
 main = mainWith $ do
@@ -19,14 +22,20 @@ main = mainWith $ do
     bparser "CSV (Attoparsec)" file A.parseCSV
   forM_ csvFiles $ \file ->
     bparser "CSV (Megaparsec)" file M.parseCSV
+  forM_ csvFiles $ \file ->
+    bparser "CSV (ParParsec)" file U.parseCSV
   forM_ logFiles $ \file ->
     bparser "Log (Attoparsec)" file A.parseLog
   forM_ logFiles $ \file ->
     bparser "Log (Megaparsec)" file M.parseLog
+  forM_ logFiles $ \file ->
+    bparser "Log (ParParsec)" file U.parseLog
   forM_ jsonFiles $ \file ->
     bparser "JSON (Attoparsec)" file A.parseJson
   forM_ jsonFiles $ \file ->
     bparser "JSON (Megaparsec)" file M.parseJson
+  forM_ jsonFiles $ \file ->
+    bparser "JSON (ParParsec)" file U.parseJson
 
 bparser :: NFData a => String -> FilePath -> (ByteString -> a) -> Weigh ()
 bparser pre desc f = io (pre ++ "-" ++ desc) m path

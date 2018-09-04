@@ -50,6 +50,5 @@ escapedField =
     escapedDq  = '"' <$ string "\"\""
 
 unescapedField :: Parser ByteString
-unescapedField =
-  A.takeWhile (`notElem` (",\"\n\r" :: String))
+unescapedField = A.takeWhile (\c -> c /= ',' && c /= '"' && c /= '\n' && c /= '\r')
 {-# INLINE unescapedField #-}

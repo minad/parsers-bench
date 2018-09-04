@@ -6,7 +6,7 @@
 *~
 .cabal-sandbox/
 .hsenv
-.stack-work/
+.stack-work*
 .virtualenv
 TAGS
 benchmarks.tix
