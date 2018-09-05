@@ -7,7 +7,7 @@ import Weigh
 import qualified Data.ByteString              as B
 import qualified ParsersBench.CSV.Attoparsec  as A
 import qualified ParsersBench.CSV.Megaparsec  as M
-import qualified ParsersBench.CSV.ParParsec   as U
+import qualified ParsersBench.CSV.ParParsec   as P
 import qualified ParsersBench.Json.Attoparsec as A
 import qualified ParsersBench.Json.Megaparsec as M
 import qualified ParsersBench.Json.ParParsec  as P
@@ -50,7 +50,7 @@ bparser :: NFData a => String -> FilePath -> (ByteString -> a) -> Weigh ()
 bparser pre desc f = io (pre ++ "-" ++ desc) m path
   where
     path = "bench-data/" ++ desc
-    m pth = f <$> B.readFile pth
+    m pth = replicateM 1000 $ f <$> B.readFile pth
 
 csvFiles :: [FilePath]
 csvFiles =
