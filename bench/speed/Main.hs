@@ -6,16 +6,16 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString                as B
 import qualified ParsersBench.CSV.Attoparsec    as A
 import qualified ParsersBench.CSV.Megaparsec    as M
-import qualified ParsersBench.CSV.ParParsec     as P
+import qualified ParsersBench.CSV.PariPari     as P
 import qualified ParsersBench.Json.Attoparsec   as A
 import qualified ParsersBench.Json.Megaparsec   as M
-import qualified ParsersBench.Json.ParParsec    as P
+import qualified ParsersBench.Json.PariPari    as P
 import qualified ParsersBench.Json.MegaparsecHi as MH
-import qualified ParsersBench.Json.ParParsecHi  as PH
+import qualified ParsersBench.Json.PariPariHi  as PH
 import qualified ParsersBench.Json.AttoparsecHi as AH
 import qualified ParsersBench.Log.Attoparsec    as A
 import qualified ParsersBench.Log.Megaparsec    as M
-import qualified ParsersBench.Log.ParParsec     as P
+import qualified ParsersBench.Log.PariPari     as P
 
 main :: IO ()
 main = defaultMain
@@ -23,25 +23,25 @@ main = defaultMain
     [ bparser file A.parseCSV | file <- csvFiles ]
   , bgroup "CSV (Megaparsec)"
     [ bparser file M.parseCSV | file <- csvFiles ]
-  , bgroup "CSV (ParParsec)"
+  , bgroup "CSV (PariPari)"
     [ bparser file P.parseCSV | file <- csvFiles ]
   , bgroup "Log (Attoparsec)"
     [ bparser file A.parseLog | file <- logFiles ]
   , bgroup "Log (Megaparsec)"
     [ bparser file M.parseLog | file <- logFiles ]
-  , bgroup "Log (ParParsec)"
+  , bgroup "Log (PariPari)"
     [ bparser file P.parseLog | file <- logFiles ]
   , bgroup "JSON (Attoparsec)"
     [ bparser file A.parseJson | file <- jsonFiles ]
   , bgroup "JSON (Megaparsec)"
     [ bparser file M.parseJson | file <- jsonFiles ]
-  , bgroup "JSON (ParParsec)"
+  , bgroup "JSON (PariPari)"
     [ bparser file P.parseJson | file <- jsonFiles ]
   , bgroup "JSON (AttoparsecHi)"
     [ bparser file AH.parseJson | file <- jsonFiles ]
   , bgroup "JSON (MegaparsecHi)"
     [ bparser file MH.parseJson | file <- jsonFiles ]
-  , bgroup "JSON (ParParsecHi)"
+  , bgroup "JSON (PariPariHi)"
     [ bparser file PH.parseJson | file <- jsonFiles ]
   ]
 

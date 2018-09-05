@@ -29,7 +29,7 @@ library
                     , bytestring
                     , deepseq
                     , megaparsec
-                    , parparsec
+                    , paripari
                     , parser-combinators
                     , scientific
                     , text
@@ -38,18 +38,18 @@ library
                     , vector
   exposed-modules:    ParsersBench.CSV.Attoparsec
                     , ParsersBench.CSV.Megaparsec
-                    , ParsersBench.CSV.ParParsec
+                    , ParsersBench.CSV.PariPari
                     , ParsersBench.Json.Attoparsec
                     , ParsersBench.Json.AttoparsecHi
                     , ParsersBench.Json.Common
                     , ParsersBench.Json.Megaparsec
                     , ParsersBench.Json.MegaparsecHi
-                    , ParsersBench.Json.ParParsec
-                    , ParsersBench.Json.ParParsecHi
+                    , ParsersBench.Json.PariPari
+                    , ParsersBench.Json.PariPariHi
                     , ParsersBench.Log.Attoparsec
                     , ParsersBench.Log.Common
                     , ParsersBench.Log.Megaparsec
-                    , ParsersBench.Log.ParParsec
+                    , ParsersBench.Log.PariPari
   if flag(dev)
     ghc-options:      -Wall -Werror
   else

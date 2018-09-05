@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE Rank2Types #-}
 
-module ParsersBench.CSV.ParParsec
+module ParsersBench.CSV.PariPari
   ( parseCSV )
 where
 
 import Control.Monad ((<$!>))
 import Data.Foldable (toList)
 import Data.Vector (Vector)
-import Text.ParParsec
+import Text.PariPari
 import qualified Data.Vector as V
 
 type Record = Vector Field

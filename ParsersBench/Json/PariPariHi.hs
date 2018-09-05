@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module ParsersBench.Json.ParParsecHi
+module ParsersBench.Json.PariPariHi
   ( parseJson )
 where
 
 import Control.Applicative
 import ParsersBench.Json.Common
-import Text.ParParsec
+import Text.PariPari
 import qualified Data.HashMap.Strict as H
 import qualified Data.Vector         as V
 import qualified Data.Scientific     as Sci

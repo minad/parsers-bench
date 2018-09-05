@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module ParsersBench.Log.ParParsec
+module ParsersBench.Log.PariPari
   ( parseLog )
 where
 
 import Data.Time
 import Data.Word (Word8)
 import ParsersBench.Log.Common
-import Text.ParParsec
+import Text.PariPari
 
 parseLog :: ByteString -> Log
 parseLog bs =
