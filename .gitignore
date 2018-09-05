@@ -4,6 +4,7 @@
 *.hi
 *.o
 *~
+report.html
 .cabal-sandbox/
 .hsenv
 .stack-work*
