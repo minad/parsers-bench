@@ -15,7 +15,7 @@ parseLog bs =
     Left err -> error (show err)
     Right x -> x
 
-parseIP :: Parser p => p IP
+parseIP :: Parser IP
 parseIP = do
   d1 <- decimal
   void (char '.')
@@ -26,7 +26,7 @@ parseIP = do
   d4 <- decimal
   return (IP d1 d2 d3 d4)
 
-timeParser :: Parser p => p LocalTime
+timeParser :: Parser LocalTime
 timeParser = do
   y  <- count 4 $ digitChar 10
   void (char '-')
@@ -44,14 +44,14 @@ timeParser = do
     , localTimeOfDay = TimeOfDay (read h) (read m) (read s)
     }
 
-productParser :: Parser p => p Product
+productParser :: Parser Product
 productParser =
       (Mouse    <$ string "mouse")
   <|> (Keyboard <$ string "keyboard")
   <|> (Monitor  <$ string "monitor")
   <|> (Speakers <$ string "speakers")
 
-logEntryParser :: Parser p => p LogEntry
+logEntryParser :: Parser LogEntry
 logEntryParser = do
   t <- timeParser
   void (char ' ')
@@ -60,8 +60,8 @@ logEntryParser = do
   p <- productParser
   return (LogEntry t ip p)
 
-logParser :: Parser p => p Log
+logParser :: Parser Log
 logParser = many (logEntryParser <* char '\n')
 
-decimal :: Parser p => p Word8
+decimal :: Parser Word8
 decimal = fst <$> integer (pure ()) 10

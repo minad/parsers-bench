@@ -17,17 +17,17 @@ parseJson bs =
     Left err -> error (show err)
     Right x -> x
 
-json :: Parser p => p Value
+json :: Parser Value
 json = space *> (object <|> array)
 
-object :: Parser p => p Value
+object :: Parser Value
 object = Object . H.fromList <$> (char '{' *> space *> sepBy pair (space *> char ',' *> space) <* space <* char '}')
   where pair = liftA2 (,) (jstring <* space) (char ':' *> space *> value)
 
-array :: Parser p => p Value
+array :: Parser Value
 array = Array . V.fromList <$> (char '[' *> sepBy value (space *> char ',' *> space) <* space <* char ']')
 
-value :: Parser p => p Value
+value :: Parser Value
 value = do
   (String <$> jstring)
     <|> object
@@ -37,13 +37,13 @@ value = do
     <|> (Null       <$ string "null")
     <|> (Number     <$> scientific)
 
-jstring :: Parser p => p Text
+jstring :: Parser Text
 jstring = char '"' *> asString (skipMany $ satisfy (/= '"')) <* char '"'
 
-space :: Parser p => p ()
+space :: Parser ()
 space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
 
-scientific :: Parser p => p Sci.Scientific
+scientific :: Parser Sci.Scientific
 scientific = do
   neg <- option id $ negate <$ char '-'
   (c, _, e) <- fractionDec (pure ())
