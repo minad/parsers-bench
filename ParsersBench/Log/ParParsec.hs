@@ -28,17 +28,17 @@ parseIP = do
 
 timeParser :: Parser p => p LocalTime
 timeParser = do
-  y  <- count 4 digitChar
+  y  <- count 4 $ digitChar 10
   void (char '-')
-  mm <- count 2 digitChar
+  mm <- count 2 $ digitChar 10
   void (char '-')
-  d  <- count 2 digitChar
+  d  <- count 2 $ digitChar 10
   void (char ' ')
-  h  <- count 2 digitChar
+  h  <- count 2 $ digitChar 10
   void (char ':')
-  m  <- count 2 digitChar
+  m  <- count 2 $ digitChar 10
   void (char ':')
-  s  <- count 2 digitChar
+  s  <- count 2 $ digitChar 10
   return LocalTime
     { localDay       = fromGregorian (read y) (read mm) (read d)
     , localTimeOfDay = TimeOfDay (read h) (read m) (read s)

@@ -6,16 +6,16 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString                as B
 import qualified ParsersBench.CSV.Attoparsec    as A
 import qualified ParsersBench.CSV.Megaparsec    as M
-import qualified ParsersBench.CSV.ParParsec      as U
+import qualified ParsersBench.CSV.ParParsec     as P
 import qualified ParsersBench.Json.Attoparsec   as A
 import qualified ParsersBench.Json.Megaparsec   as M
-import qualified ParsersBench.Json.ParParsec     as U
+import qualified ParsersBench.Json.ParParsec    as P
 import qualified ParsersBench.Json.MegaparsecHi as MH
-import qualified ParsersBench.Json.ParParsecHi   as UH
+import qualified ParsersBench.Json.ParParsecHi  as PH
 import qualified ParsersBench.Json.AttoparsecHi as AH
 import qualified ParsersBench.Log.Attoparsec    as A
 import qualified ParsersBench.Log.Megaparsec    as M
-import qualified ParsersBench.Log.ParParsec      as U
+import qualified ParsersBench.Log.ParParsec     as P
 
 main :: IO ()
 main = defaultMain
@@ -24,25 +24,25 @@ main = defaultMain
   , bgroup "CSV (Megaparsec)"
     [ bparser file M.parseCSV | file <- csvFiles ]
   , bgroup "CSV (ParParsec)"
-    [ bparser file U.parseCSV | file <- csvFiles ]
+    [ bparser file P.parseCSV | file <- csvFiles ]
   , bgroup "Log (Attoparsec)"
     [ bparser file A.parseLog | file <- logFiles ]
   , bgroup "Log (Megaparsec)"
     [ bparser file M.parseLog | file <- logFiles ]
   , bgroup "Log (ParParsec)"
-    [ bparser file U.parseLog | file <- logFiles ]
+    [ bparser file P.parseLog | file <- logFiles ]
   , bgroup "JSON (Attoparsec)"
     [ bparser file A.parseJson | file <- jsonFiles ]
-  , bgroup "JSON (AttoparsecHi)"
-    [ bparser file AH.parseJson | file <- jsonFiles ]
   , bgroup "JSON (Megaparsec)"
     [ bparser file M.parseJson | file <- jsonFiles ]
   , bgroup "JSON (ParParsec)"
-    [ bparser file U.parseJson | file <- jsonFiles ]
+    [ bparser file P.parseJson | file <- jsonFiles ]
+  , bgroup "JSON (AttoparsecHi)"
+    [ bparser file AH.parseJson | file <- jsonFiles ]
   , bgroup "JSON (MegaparsecHi)"
     [ bparser file MH.parseJson | file <- jsonFiles ]
   , bgroup "JSON (ParParsecHi)"
-    [ bparser file UH.parseJson | file <- jsonFiles ]
+    [ bparser file PH.parseJson | file <- jsonFiles ]
   ]
 
 bparser :: NFData a => FilePath -> (ByteString -> a) -> Benchmark
@@ -52,24 +52,21 @@ bparser desc f = env (B.readFile path) (bench desc . nf f)
 
 csvFiles :: [FilePath]
 csvFiles =
-  [ --"csv-5.csv"
-  --, "csv-10.csv"
-  --, "csv-20.csv"
-  --,
-    "csv-40.csv" ]
+  [ "csv-5.csv"
+  , "csv-10.csv"
+  , "csv-20.csv"
+  , "csv-40.csv" ]
 
 logFiles :: [FilePath]
 logFiles =
-  [ --"log-5.log"
-    --, "log-10.log"
-    --, "log-20.log"
-    --,
-    "log-40.log" ]
+  [ "log-5.log"
+  , "log-10.log"
+  , "log-20.log"
+  , "log-40.log" ]
 
 jsonFiles :: [FilePath]
 jsonFiles =
-  [ --"json-5.json"
-  --, "json-10.json"
-  --, "json-20.json"
-  --,
-    "json-40.json" ]
+  [ "json-5.json"
+  , "json-10.json"
+  , "json-20.json"
+  , "json-40.json" ]

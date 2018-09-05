@@ -7,13 +7,16 @@ import Weigh
 import qualified Data.ByteString              as B
 import qualified ParsersBench.CSV.Attoparsec  as A
 import qualified ParsersBench.CSV.Megaparsec  as M
-import qualified ParsersBench.CSV.ParParsec    as U
+import qualified ParsersBench.CSV.ParParsec   as U
 import qualified ParsersBench.Json.Attoparsec as A
 import qualified ParsersBench.Json.Megaparsec as M
-import qualified ParsersBench.Json.ParParsec   as U
+import qualified ParsersBench.Json.ParParsec  as P
+import qualified ParsersBench.Json.AttoparsecHi as AH
+import qualified ParsersBench.Json.MegaparsecHi as MH
+import qualified ParsersBench.Json.ParParsecHi  as PH
 import qualified ParsersBench.Log.Attoparsec  as A
 import qualified ParsersBench.Log.Megaparsec  as M
-import qualified ParsersBench.Log.ParParsec    as U
+import qualified ParsersBench.Log.ParParsec   as P
 
 main :: IO ()
 main = mainWith $ do
@@ -23,19 +26,25 @@ main = mainWith $ do
   forM_ csvFiles $ \file ->
     bparser "CSV (Megaparsec)" file M.parseCSV
   forM_ csvFiles $ \file ->
-    bparser "CSV (ParParsec)" file U.parseCSV
+    bparser "CSV (ParParsec)" file P.parseCSV
   forM_ logFiles $ \file ->
     bparser "Log (Attoparsec)" file A.parseLog
   forM_ logFiles $ \file ->
     bparser "Log (Megaparsec)" file M.parseLog
   forM_ logFiles $ \file ->
-    bparser "Log (ParParsec)" file U.parseLog
+    bparser "Log (ParParsec)" file P.parseLog
   forM_ jsonFiles $ \file ->
     bparser "JSON (Attoparsec)" file A.parseJson
   forM_ jsonFiles $ \file ->
     bparser "JSON (Megaparsec)" file M.parseJson
   forM_ jsonFiles $ \file ->
-    bparser "JSON (ParParsec)" file U.parseJson
+    bparser "JSON (ParParsec)" file P.parseJson
+  forM_ jsonFiles $ \file ->
+    bparser "JSON (AttoparsecHi)" file AH.parseJson
+  forM_ jsonFiles $ \file ->
+    bparser "JSON (MegaparsecHi)" file MH.parseJson
+  forM_ jsonFiles $ \file ->
+    bparser "JSON (ParParsecHi)" file PH.parseJson
 
 bparser :: NFData a => String -> FilePath -> (ByteString -> a) -> Weigh ()
 bparser pre desc f = io (pre ++ "-" ++ desc) m path
