@@ -5,7 +5,6 @@ module ParsersBench.Log.PariPari
 where
 
 import Data.Time
-import Data.Word (Word8)
 import ParsersBench.Log.Common
 import Text.PariPari
 
@@ -62,6 +61,3 @@ logEntryParser = do
 
 logParser :: Parser Log
 logParser = many (logEntryParser <* char '\n')
-
-decimal :: Parser Word8
-decimal = fst <$> integer (pure ()) 10
