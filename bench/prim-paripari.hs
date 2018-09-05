@@ -34,22 +34,19 @@ main = defaultMain
   , bparser "skipCount" manyAs (\(_,n) -> skipCount n (char 'a'))
   , bparser "skipManyTill" manyAsB (const $ skipManyTill (char 'a') (char 'b'))
   , bparser "skipSomeTill" manyAsB (const $ skipSomeTill (char 'a') (char 'b'))
-  , bparser "takeWhileP" manyAs (const $ takeWhileP (== 'a'))
-  , bparser "takeWhile1P" manyAs (const $ takeWhile1P (== 'a'))
+  , bparser "takeWhileP" manyAs (const $ takeCharsWhile (== 'a'))
+  , bparser "takeWhile1P" manyAs (const $ takeCharsWhile1 (== 'a'))
+  , bparser "skipCharsWhile" manyAs (const $ skipCharsWhile (== 'a'))
+  , bparser "skipCharsWhile1" manyAs (const $ skipCharsWhile (== 'a'))
   , bparser "decimal" mkInt (const (decimal :: Acceptor Integer))
   , bparser "octal" mkInt (const (octal :: Acceptor Integer))
   , bparser "hexadecimal" mkInt (const (hexadecimal :: Acceptor Integer))
   , bparser "scientific" mkInt (const (fractionDec (pure ()) :: Acceptor (Integer, Int, Integer)))
-  , bparser "skipWhile" manyAs (const $ skipWhile (== 'a'))
+  , bparser "takeBytesWhile" manyAs (const $ takeBytesWhile (== 97))
+  , bparser "takeBytesWhile1" manyAs (const $ takeBytesWhile (== 97))
+  , bparser "skipBytesWhile" manyAs (const $ skipBytesWhile (== 97))
+  , bparser "skipBytesWhile1" manyAs (const $ skipBytesWhile (== 97))
   ]
-
-takeWhileP :: (Char -> Bool) -> Parser Text
-takeWhileP f = asString (skipWhile f)
-{-# INLINE takeWhileP #-}
-
-takeWhile1P :: (Char -> Bool) -> Parser Text
-takeWhile1P f = asString (satisfy f *> skipWhile f)
-{-# INLINE takeWhile1P #-}
 
 instance NFData Error
 
