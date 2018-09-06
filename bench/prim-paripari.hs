@@ -10,12 +10,11 @@ import Data.Semigroup ((<>))
 import Data.Text (Text)
 import Text.PariPari
 import qualified Data.Text                  as T
-import qualified Data.Text.Encoding         as T
 
 main :: IO ()
 main = defaultMain
-  [ bparser "string"   manyAs (string . fst)
-  , bparser "string'"  manyAs (string' . fst)
+  [ bparser "string"   manyAs (chunk . fst)
+  --, bparser "string'"  manyAs (string' . fst)
   , bparser "many"     manyAs (const $ many (char 'a'))
   , bparser "some"     manyAs (const $ some (char 'a'))
   , bparser "choice"   (const "b") (choice . fmap char . manyAsB' . snd)
@@ -38,14 +37,14 @@ main = defaultMain
   , bparser "takeWhile1P" manyAs (const $ takeCharsWhile1 (== 'a'))
   , bparser "skipCharsWhile" manyAs (const $ skipCharsWhile (== 'a'))
   , bparser "skipCharsWhile1" manyAs (const $ skipCharsWhile (== 'a'))
-  , bparser "decimal" mkInt (const (decimal :: Acceptor Integer))
-  , bparser "octal" mkInt (const (octal :: Acceptor Integer))
-  , bparser "hexadecimal" mkInt (const (hexadecimal :: Acceptor Integer))
-  , bparser "scientific" mkInt (const (fractionDec (pure ()) :: Acceptor (Integer, Int, Integer)))
-  , bparser "takeBytesWhile" manyAs (const $ takeBytesWhile (== 97))
-  , bparser "takeBytesWhile1" manyAs (const $ takeBytesWhile (== 97))
-  , bparser "skipBytesWhile" manyAs (const $ skipBytesWhile (== 97))
-  , bparser "skipBytesWhile1" manyAs (const $ skipBytesWhile (== 97))
+  , bparser "decimal" mkInt (const (decimal :: Acceptor Text Integer))
+  , bparser "octal" mkInt (const (octal :: Acceptor Text Integer))
+  , bparser "hexadecimal" mkInt (const (hexadecimal :: Acceptor Text Integer))
+  , bparser "scientific" mkInt (const (fractionDec (pure ()) :: Acceptor Text (Integer, Int, Integer)))
+  , bparser "takeElementsWhile" manyAs (const $ takeElementsWhile (== 'a'))
+  , bparser "takeElementsWhile1" manyAs (const $ takeElementsWhile (== 'a'))
+  , bparser "skipElementsWhile" manyAs (const $ skipElementsWhile (== 'a'))
+  , bparser "skipElementsWhile1" manyAs (const $ skipElementsWhile (== 'a'))
   ]
 
 instance NFData Error
@@ -55,12 +54,12 @@ instance NFData Error
 bparser :: NFData a
   => String            -- ^ Name of the benchmark group
   -> (Int -> Text)     -- ^ How to construct input
-  -> ((Text, Int) -> Acceptor a) -- ^ The parser receiving its future input
+  -> ((Text, Int) -> Acceptor Text a) -- ^ The parser receiving its future input
   -> Benchmark         -- ^ The benchmark
 bparser name f p = bgroup name (bs <$> stdSeries)
   where
     bs n = env (return (f n, n)) (bench (show n) . nf p')
-    p' (s,n) = runAcceptor (p (s,n)) "" (T.encodeUtf8 s)
+    p' (s,n) = runAcceptor (p (s,n)) "" s
 
 -- | The series of sizes to try as part of 'bparser'.
 

@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module ParsersBench.Log.PariPari
   ( parseLog )
@@ -7,10 +9,14 @@ where
 import Data.Time
 import ParsersBench.Log.Common
 import Text.PariPari
+import Data.ByteString (ByteString)
+
+type StringType = ByteString
+type Parser a = (forall p. CharParser StringType p => p a)
 
 parseLog :: ByteString -> Log
 parseLog bs =
-  case runParser logParser "" bs of
+  case runCharParser logParser "" bs of
     Left err -> error (show err)
     Right x -> x
 
@@ -45,10 +51,10 @@ timeParser = do
 
 productParser :: Parser Product
 productParser =
-      (Mouse    <$ string "mouse")
-  <|> (Keyboard <$ string "keyboard")
-  <|> (Monitor  <$ string "monitor")
-  <|> (Speakers <$ string "speakers")
+      (Mouse    <$ chunk "mouse")
+  <|> (Keyboard <$ chunk "keyboard")
+  <|> (Monitor  <$ chunk "monitor")
+  <|> (Speakers <$ chunk "speakers")
 
 logEntryParser :: Parser LogEntry
 logEntryParser = do

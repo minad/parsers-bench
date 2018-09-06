@@ -52,21 +52,21 @@ bparser desc f = env (B.readFile path) (bench desc . nf f)
 
 csvFiles :: [FilePath]
 csvFiles =
-  [ "csv-5.csv"
-  , "csv-10.csv"
-  , "csv-20.csv"
-  , "csv-40.csv" ]
+  [-- "csv-5.csv"
+  --, "csv-10.csv"
+  --, "csv-20.csv"
+   "csv-40.csv" ]
 
 logFiles :: [FilePath]
 logFiles =
-  [ "log-5.log"
-  , "log-10.log"
-  , "log-20.log"
-  , "log-40.log" ]
+  [-- "log-5.log"
+  --, "log-10.log"
+  --, "log-20.log"
+   "log-40.log" ]
 
 jsonFiles :: [FilePath]
 jsonFiles =
-  [ "json-5.json"
-  , "json-10.json"
-  , "json-20.json"
-  , "json-40.json" ]
+  [-- "json-5.json"
+  --, "json-10.json"
+  --, "json-20.json"
+   "json-40.json" ]

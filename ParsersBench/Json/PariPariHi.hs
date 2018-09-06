@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module ParsersBench.Json.PariPariHi
   ( parseJson )
@@ -10,10 +12,15 @@ import Text.PariPari
 import qualified Data.HashMap.Strict as H
 import qualified Data.Vector         as V
 import qualified Data.Scientific     as Sci
+import Data.ByteString (ByteString)
+import Data.Text (Text)
+import qualified Data.Text.Encoding  as T
+
+type Parser a = (forall p. CharParser Text p => p a)
 
 parseJson :: ByteString -> Value
 parseJson bs =
-  case runParser json "" bs of
+  case runCharParser json "" (T.decodeUtf8 bs) of
     Left err -> error (show err)
     Right x -> x
 
@@ -32,13 +39,13 @@ value = do
   (String <$> jstring)
     <|> object
     <|> array
-    <|> (Bool False <$ string "false")
-    <|> (Bool True  <$ string "true")
-    <|> (Null       <$ string "null")
+    <|> (Bool False <$ chunk "false")
+    <|> (Bool True  <$ chunk "true")
+    <|> (Null       <$ chunk "null")
     <|> (Number     <$> scientific)
 
 jstring :: Parser Text
-jstring = char '"' *> asString (skipMany $ satisfy (/= '"')) <* char '"'
+jstring = char '"' *> asChunk (skipMany $ satisfy (/= '"')) <* char '"'
 
 space :: Parser ()
 space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
