@@ -26,13 +26,16 @@ parseJson bs =
 
 json :: Parser Value
 json = space *> (object <|> array)
+{-# SPECIALISE json :: Acceptor Text Value #-}
 
 object :: Parser Value
 object = Object . H.fromList <$> (char '{' *> space *> sepBy pair (space *> char ',' *> space) <* space <* char '}')
   where pair = liftA2 (,) (jstring <* space) (char ':' *> space *> value)
+{-# SPECIALISE object :: Acceptor Text Value #-}
 
 array :: Parser Value
 array = Array . V.fromList <$> (char '[' *> sepBy value (space *> char ',' *> space) <* space <* char ']')
+{-# SPECIALISE array :: Acceptor Text Value #-}
 
 value :: Parser Value
 value = do
@@ -43,15 +46,19 @@ value = do
     <|> (Bool True  <$ chunk "true")
     <|> (Null       <$ chunk "null")
     <|> (Number     <$> scientific)
+{-# SPECIALISE value :: Acceptor Text Value #-}
 
 jstring :: Parser Text
 jstring = char '"' *> asChunk (skipMany $ satisfy (/= '"')) <* char '"'
+{-# SPECIALISE jstring :: Acceptor Text Text #-}
 
 space :: Parser ()
 space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
+{-# SPECIALISE space :: Acceptor Text () #-}
 
 scientific :: Parser Sci.Scientific
 scientific = do
   neg <- option id $ negate <$ char '-'
   (c, _, e) <- fractionDec (pure ())
   pure $ Sci.scientific (neg c) (fromIntegral e)
+{-# SPECIALISE scientific :: Acceptor Text Sci.Scientific #-}

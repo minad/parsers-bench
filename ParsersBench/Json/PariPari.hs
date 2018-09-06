@@ -27,6 +27,7 @@ parseJson bs =
 
 json :: Parser Value
 json = json_ object_ array_
+{-# SPECIALISE json :: Acceptor ByteString Value #-}
 
 json_ :: CharParser StringType p => p Value -> p Value -> p Value
 json_ obj ary = do
@@ -35,9 +36,11 @@ json_ obj ary = do
     then obj
     else ary
 {-# INLINE json_ #-}
+{-# SPECIALISE json_ :: Acceptor ByteString Value -> Acceptor ByteString Value -> Acceptor ByteString Value #-}
 
 object_ :: Parser Value
 object_ = Object <$> objectValues jstring value
+{-# SPECIALISE object_ :: Acceptor ByteString Value #-}
 
 objectValues :: CharParser StringType p => p Text -> p Value -> p (H.HashMap Text Value)
 objectValues str val = do
@@ -45,15 +48,18 @@ objectValues str val = do
   let pair = liftA2 (,) (str <* space) (char ':' *> space *> val)
   H.fromList <$> commaSeparated pair '}'
 {-# INLINE objectValues #-}
+{-# SPECIALISE objectValues :: Acceptor ByteString Text -> Acceptor ByteString Value -> Acceptor ByteString (H.HashMap Text Value) #-}
 
 array_ :: Parser Value
 array_ = Array <$> arrayValues value
+{-# SPECIALISE array_ :: Acceptor ByteString Value #-}
 
 arrayValues :: CharParser StringType p => p Value -> p (Vector Value)
 arrayValues val = do
   space
   V.fromList <$> commaSeparated val ']'
 {-# INLINE arrayValues #-}
+{-# SPECIALISE arrayValues :: Acceptor ByteString Value -> Acceptor ByteString (Vector Value) #-}
 
 commaSeparated :: CharParser StringType p => p a -> Char -> p [a]
 commaSeparated item endByte = do
@@ -69,6 +75,8 @@ commaSeparated item endByte = do
         then space >> (v:) <$> loop
         else return [v]
 {-# INLINE commaSeparated #-}
+{-# SPECIALISE commaSeparated :: Acceptor ByteString Value -> Char -> Acceptor ByteString [Value] #-}
+{-# SPECIALISE commaSeparated :: Acceptor ByteString (Text, Value) -> Char -> Acceptor ByteString [(Text, Value)] #-}
 
 value :: Parser Value
 value = do
@@ -83,20 +91,25 @@ value = do
     _
       | w >= '0' && w <= '9' || w == '-' -> Number <$> scientific
       | otherwise -> fail "not a valid json value"
+{-# SPECIALISE value :: Acceptor ByteString Value #-}
 
 jstring :: Parser Text
 jstring = char '"' *> jstring_
+{-# SPECIALISE jstring :: Acceptor ByteString Text #-}
 
 jstring_ :: Parser Text
 jstring_ =
   T.decodeUtf8 <$> asChunk (skipMany $ satisfy (/= '"')) <* char '"'
 {-# INLINE jstring_ #-}
+{-# SPECIALISE jstring_ :: Acceptor ByteString Text #-}
 
 space :: Parser ()
 space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
+{-# SPECIALISE space :: Acceptor ByteString () #-}
 
 scientific :: Parser Sci.Scientific
 scientific = do
   neg <- option id $ negate <$ char '-'
   (c, _, e) <- fractionDec (pure ())
   pure $ Sci.scientific (neg c) (fromIntegral e)
+{-# SPECIALISE scientific :: Acceptor ByteString Sci.Scientific #-}
