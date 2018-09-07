@@ -1,6 +1,8 @@
+{-# OPTIONS_GHC -F -pgmF paripari-specialise-all #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds #-}
 
 module ParsersBench.CSV.PariPari
   ( parseCSV )
@@ -9,13 +11,20 @@ where
 import Control.Monad ((<$!>))
 import Data.Foldable (toList)
 import Data.Vector (Vector)
+import Data.List.NonEmpty (NonEmpty)
 import Text.PariPari
 import qualified Data.Vector as V
 import Data.ByteString (ByteString)
 
-type StringType = ByteString
-type Parser a = (forall p. CharParser StringType p => p a)
-type Record = Vector StringType
+type Record        = Vector StringType
+type StringType    = ByteString
+type ParserMonad p = CharParser StringType p
+type Parser a      = (forall p. ParserMonad p => p a)
+
+{-# SPECIALISE_ALL ParserMonad p = p ~ Acceptor StringType #-}
+{-# SPECIALISE_ALL ParserMonad p = p ~ Reporter StringType #-}
+{-# SPECIALISE_ALL Parser = Acceptor StringType #-}
+{-# SPECIALISE_ALL Parser = Reporter StringType #-}
 
 -- | Parse a CSV file without conversion of individual records.
 

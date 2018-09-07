@@ -1,6 +1,8 @@
+{-# OPTIONS_GHC -F -pgmF paripari-specialise-all #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds #-}
 
 module ParsersBench.Json.PariPariHi
   ( parseJson )
@@ -16,26 +18,30 @@ import Data.ByteString (ByteString)
 import Data.Text (Text)
 import qualified Data.Text.Encoding  as T
 
-type Parser a = (forall p. CharParser Text p => p a)
+type StringType    = Text
+type ParserMonad p = CharParser StringType p
+type Parser a      = (forall p. ParserMonad p => p a)
+
+{-# SPECIALISE_ALL ParserMonad p = p ~ Acceptor StringType #-}
+{-# SPECIALISE_ALL ParserMonad p = p ~ Reporter StringType #-}
+{-# SPECIALISE_ALL Parser = Acceptor StringType #-}
+{-# SPECIALISE_ALL Parser = Reporter StringType #-}
 
 parseJson :: ByteString -> Value
 parseJson bs =
-  case runCharParser json "" (T.decodeUtf8 bs) of
+  case runAcceptor json "" (T.decodeUtf8 bs) of
     Left err -> error (show err)
     Right x -> x
 
 json :: Parser Value
 json = space *> (object <|> array)
-{-# SPECIALISE json :: Acceptor Text Value #-}
 
 object :: Parser Value
 object = Object . H.fromList <$> (char '{' *> space *> sepBy pair (space *> char ',' *> space) <* space <* char '}')
   where pair = liftA2 (,) (jstring <* space) (char ':' *> space *> value)
-{-# SPECIALISE object :: Acceptor Text Value #-}
 
 array :: Parser Value
 array = Array . V.fromList <$> (char '[' *> sepBy value (space *> char ',' *> space) <* space <* char ']')
-{-# SPECIALISE array :: Acceptor Text Value #-}
 
 value :: Parser Value
 value = do
@@ -46,19 +52,15 @@ value = do
     <|> (Bool True  <$ chunk "true")
     <|> (Null       <$ chunk "null")
     <|> (Number     <$> scientific)
-{-# SPECIALISE value :: Acceptor Text Value #-}
 
 jstring :: Parser Text
 jstring = char '"' *> asChunk (skipMany $ satisfy (/= '"')) <* char '"'
-{-# SPECIALISE jstring :: Acceptor Text Text #-}
 
 space :: Parser ()
 space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
-{-# SPECIALISE space :: Acceptor Text () #-}
 
 scientific :: Parser Sci.Scientific
 scientific = do
   neg <- option id $ negate <$ char '-'
   (c, _, e) <- fractionDec (pure ())
   pure $ Sci.scientific (neg c) (fromIntegral e)
-{-# SPECIALISE scientific :: Acceptor Text Sci.Scientific #-}
