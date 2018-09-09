@@ -5,7 +5,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 
 module ParsersBench.Json.PariPari
-  ( parseJson )
+  ( parseJson, parseJsonReporter )
 where
 
 import Control.Applicative
@@ -31,6 +31,12 @@ type Parser a      = (forall p. ParserMonad p => p a)
 parseJson :: ByteString -> Value
 parseJson bs =
   case runCharParser json "" bs of
+    Left err -> error (show err)
+    Right x -> x
+
+parseJsonReporter :: ByteString -> Value
+parseJsonReporter bs =
+  case runReporter json "" bs of
     Left err -> error (show err)
     Right x -> x
 

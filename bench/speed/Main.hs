@@ -19,30 +19,38 @@ import qualified ParsersBench.Log.PariPari     as P
 
 main :: IO ()
 main = defaultMain
-  [ bgroup "CSV (Attoparsec)"
+  [ bgroup "CSV (PariPari)"
+    [ bparser file P.parseCSV | file <- csvFiles ]
+  , bgroup "CSV (PariPari, Reporter)"
+    [ bparser file P.parseCSVReporter | file <- csvFiles ]
+  , bgroup "CSV (Attoparsec)"
     [ bparser file A.parseCSV | file <- csvFiles ]
   , bgroup "CSV (Megaparsec)"
     [ bparser file M.parseCSV | file <- csvFiles ]
-  , bgroup "CSV (PariPari)"
-    [ bparser file P.parseCSV | file <- csvFiles ]
+  , bgroup "Log (PariPari)"
+    [ bparser file P.parseLog | file <- logFiles ]
+  , bgroup "Log (PariPari, Reporter)"
+    [ bparser file P.parseLogReporter | file <- logFiles ]
   , bgroup "Log (Attoparsec)"
     [ bparser file A.parseLog | file <- logFiles ]
   , bgroup "Log (Megaparsec)"
     [ bparser file M.parseLog | file <- logFiles ]
-  , bgroup "Log (PariPari)"
-    [ bparser file P.parseLog | file <- logFiles ]
+  , bgroup "JSON (PariPari)"
+    [ bparser file P.parseJson | file <- jsonFiles ]
+  , bgroup "JSON (PariPari, Reporter)"
+    [ bparser file P.parseJsonReporter | file <- jsonFiles ]
   , bgroup "JSON (Attoparsec)"
     [ bparser file A.parseJson | file <- jsonFiles ]
   , bgroup "JSON (Megaparsec)"
     [ bparser file M.parseJson | file <- jsonFiles ]
-  , bgroup "JSON (PariPari)"
-    [ bparser file P.parseJson | file <- jsonFiles ]
-  , bgroup "JSON (AttoparsecHi)"
-    [ bparser file AH.parseJson | file <- jsonFiles ]
-  , bgroup "JSON (MegaparsecHi)"
-    [ bparser file MH.parseJson | file <- jsonFiles ]
-  , bgroup "JSON (PariPariHi)"
+  , bgroup "JSON (PariPari, highlevel)"
     [ bparser file PH.parseJson | file <- jsonFiles ]
+  , bgroup "JSON (PariPari, Reporter, highlevel)"
+    [ bparser file PH.parseJsonReporter | file <- jsonFiles ]
+  , bgroup "JSON (Attoparsec, highlevel)"
+    [ bparser file AH.parseJson | file <- jsonFiles ]
+  , bgroup "JSON (Megaparsec, highlevel)"
+    [ bparser file MH.parseJson | file <- jsonFiles ]
   ]
 
 bparser :: NFData a => FilePath -> (ByteString -> a) -> Benchmark

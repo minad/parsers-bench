@@ -5,7 +5,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 
 module ParsersBench.CSV.PariPari
-  ( parseCSV )
+  ( parseCSV, parseCSVReporter )
 where
 
 import Control.Monad ((<$!>))
@@ -31,6 +31,12 @@ type Parser a      = (forall p. ParserMonad p => p a)
 parseCSV :: ByteString -> NonEmpty Record
 parseCSV bs =
   case runCharParser csv "" bs of
+    Left err -> error (show err)
+    Right x -> x
+
+parseCSVReporter :: ByteString -> NonEmpty Record
+parseCSVReporter bs =
+  case runReporter csv "" bs of
     Left err -> error (show err)
     Right x -> x
 

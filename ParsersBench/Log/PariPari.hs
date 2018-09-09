@@ -5,7 +5,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 
 module ParsersBench.Log.PariPari
-  ( parseLog )
+  ( parseLog, parseLogReporter )
 where
 
 import Data.Time
@@ -25,6 +25,12 @@ type Parser a      = (forall p. ParserMonad p => p a)
 parseLog :: ByteString -> Log
 parseLog bs =
   case runCharParser logParser "" bs of
+    Left err -> error (show err)
+    Right x -> x
+
+parseLogReporter :: ByteString -> Log
+parseLogReporter bs =
+  case runReporter logParser "" bs of
     Left err -> error (show err)
     Right x -> x
 
