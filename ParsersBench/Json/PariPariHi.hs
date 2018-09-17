@@ -3,6 +3,7 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE TupleSections #-}
 
 module ParsersBench.Json.PariPariHi
   ( parseJson, parseJsonReporter )
@@ -68,5 +69,5 @@ space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
 scientific :: Parser Sci.Scientific
 scientific = do
   neg <- option id $ negate <$ char '-'
-  (c, _, e) <- fractionDec (pure ())
+  (c, _, e) <- fractionDec (pure ()) <|> (,10,0) <$> decimal
   pure $ Sci.scientific (neg c) (fromIntegral e)
