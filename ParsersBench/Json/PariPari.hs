@@ -113,6 +113,8 @@ space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
 
 scientific :: Parser Sci.Scientific
 scientific = do
-  neg <- option id $ negate <$ char '-'
-  (c, _, e) <- fractionDec (pure ()) <|> (,10,0) <$> decimal
-  pure $ Sci.scientific (neg c) (fromIntegral e)
+  neg <- sign
+  frac <- fractionDec (pure ())
+  pure $ case frac of
+           Left n -> Sci.scientific (neg n) 0
+           Right (c, _, e) -> Sci.scientific (neg c) (fromIntegral e)
