@@ -21,30 +21,30 @@ import qualified Data.Text.Encoding  as T
 import qualified Data.Vector         as V
 
 type StringType    = ByteString
-type ParserMonad p = CharParser StringType p
-type Parser a      = (forall p. ParserMonad p => p a)
+type PMonad p = Parser StringType p
+type P a      = (forall p. PMonad p => p a)
 
-{-# SPECIALISE_ALL ParserMonad p = p ~ Acceptor StringType #-}
-{-# SPECIALISE_ALL ParserMonad p = p ~ Reporter StringType #-}
-{-# SPECIALISE_ALL Parser = Acceptor StringType #-}
-{-# SPECIALISE_ALL Parser = Reporter StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Acceptor StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Reporter StringType #-}
+{-# SPECIALISE_ALL P = Acceptor StringType #-}
+{-# SPECIALISE_ALL P = Reporter StringType #-}
 
 parseJson :: ByteString -> Value
 parseJson bs =
-  case runCharParser json "" bs of
-    Left err -> error (show err)
-    Right x -> x
+  case runParser json "" bs of
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
 parseJsonReporter :: ByteString -> Value
 parseJsonReporter bs =
   case runReporter json "" bs of
-    Left err -> error (show err)
-    Right x -> x
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
-json :: Parser Value
+json :: P Value
 json = json_ object_ array_
 
-json_ :: ParserMonad p => p Value -> p Value -> p Value
+json_ :: PMonad p => p Value -> p Value -> p Value
 json_ obj ary = do
   w <- space *> (char '{' <|> char '[')
   if w == '{'
@@ -52,26 +52,26 @@ json_ obj ary = do
     else ary
 {-# INLINE json_ #-}
 
-object_ :: Parser Value
+object_ :: P Value
 object_ = Object <$> objectValues jstring value
 
-objectValues :: ParserMonad p => p Text -> p Value -> p (H.HashMap Text Value)
+objectValues :: PMonad p => p Text -> p Value -> p (H.HashMap Text Value)
 objectValues str val = do
   space
   let pair = liftA2 (,) (str <* space) (char ':' *> space *> val)
   H.fromList <$> commaSeparated pair '}'
 {-# INLINE objectValues #-}
 
-array_ :: Parser Value
+array_ :: P Value
 array_ = Array <$> arrayValues value
 
-arrayValues :: ParserMonad p => p Value -> p (Vector Value)
+arrayValues :: PMonad p => p Value -> p (Vector Value)
 arrayValues val = do
   space
   V.fromList <$> commaSeparated val ']'
 {-# INLINE arrayValues #-}
 
-commaSeparated :: ParserMonad p => p a -> Char -> p [a]
+commaSeparated :: PMonad p => p a -> Char -> p [a]
 commaSeparated item endByte = do
   w <- lookAhead anyChar
   if w == endByte
@@ -86,7 +86,7 @@ commaSeparated item endByte = do
         else return [v]
 {-# INLINE commaSeparated #-}
 
-value :: Parser Value
+value :: P Value
 value = do
   w <- lookAhead anyChar
   case w of
@@ -100,18 +100,18 @@ value = do
       | w >= '0' && w <= '9' || w == '-' -> Number <$> scientific
       | otherwise -> fail "not a valid json value"
 
-jstring :: Parser Text
+jstring :: P Text
 jstring = char '"' *> jstring_
 
-jstring_ :: Parser Text
+jstring_ :: P Text
 jstring_ =
   T.decodeUtf8 <$> asChunk (skipMany $ satisfy (/= '"')) <* char '"'
 {-# INLINE jstring_ #-}
 
-space :: Parser ()
+space :: P ()
 space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
 
-scientific :: Parser Sci.Scientific
+scientific :: P Sci.Scientific
 scientific = do
   neg <- sign
   frac <- fractionDec (pure ())

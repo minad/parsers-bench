@@ -1,6 +1,7 @@
 *#
 *.chi
 *.chs.h
+stack.yaml.lock
 *.hi
 *.o
 *~

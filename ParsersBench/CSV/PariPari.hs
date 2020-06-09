@@ -16,51 +16,51 @@ import Text.PariPari
 import qualified Data.Vector as V
 import Data.ByteString (ByteString)
 
-type Record        = Vector StringType
-type StringType    = ByteString
-type ParserMonad p = CharParser StringType p
-type Parser a      = (forall p. ParserMonad p => p a)
+type Record     = Vector StringType
+type StringType = ByteString
+type PMonad p   = Parser StringType p
+type P a        = (forall p. PMonad p => p a)
 
-{-# SPECIALISE_ALL ParserMonad p = p ~ Acceptor StringType #-}
-{-# SPECIALISE_ALL ParserMonad p = p ~ Reporter StringType #-}
-{-# SPECIALISE_ALL Parser = Acceptor StringType #-}
-{-# SPECIALISE_ALL Parser = Reporter StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Acceptor StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Reporter StringType #-}
+{-# SPECIALISE_ALL P = Acceptor StringType #-}
+{-# SPECIALISE_ALL P = Reporter StringType #-}
 
 -- | Parse a CSV file without conversion of individual records.
 
 parseCSV :: ByteString -> NonEmpty Record
 parseCSV bs =
-  case runCharParser csv "" bs of
-    Left err -> error (show err)
-    Right x -> x
+  case runParser csv "" bs of
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
 parseCSVReporter :: ByteString -> NonEmpty Record
 parseCSVReporter bs =
   case runReporter csv "" bs of
-    Left err -> error (show err)
-    Right x -> x
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
-csv :: Parser (NonEmpty Record)
+csv :: P (NonEmpty Record)
 csv = do
   xs <- sepEndBy1 record (char '\n')
   eof
   return xs
 
-record :: Parser Record
+record :: P Record
 record = do
   notFollowedBy eof -- to prevent reading empty line at the end of file
   V.fromList . toList <$!> (sepBy1 field (char ',') <?> "record")
 
-field :: Parser StringType
+field :: P StringType
 field = label "field" (escapedField <|> unescapedField)
 
-escapedField :: Parser StringType
+escapedField :: P StringType
 escapedField =
   between (char '"') (char '"') (asChunk $ skipMany $ normalChar <|> escapedDq)
   where
     normalChar = notChar '"' <?> "unescaped character"
     escapedDq  = label "escaped double-quote" ('"' <$ chunk "\"\"")
 
-unescapedField :: Parser StringType
+unescapedField :: P StringType
 unescapedField = asChunk $ skipMany $ satisfy (\c -> c /= ',' && c /= '"' && c /= '\n' && c /= '\r')
 {-# INLINE unescapedField #-}

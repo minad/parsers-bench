@@ -20,37 +20,37 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding  as T
 
 type StringType    = Text
-type ParserMonad p = CharParser StringType p
-type Parser a      = (forall p. ParserMonad p => p a)
+type PMonad p = Parser StringType p
+type P a      = (forall p. PMonad p => p a)
 
-{-# SPECIALISE_ALL ParserMonad p = p ~ Acceptor StringType #-}
-{-# SPECIALISE_ALL ParserMonad p = p ~ Reporter StringType #-}
-{-# SPECIALISE_ALL Parser = Acceptor StringType #-}
-{-# SPECIALISE_ALL Parser = Reporter StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Acceptor StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Reporter StringType #-}
+{-# SPECIALISE_ALL P = Acceptor StringType #-}
+{-# SPECIALISE_ALL P = Reporter StringType #-}
 
 parseJson :: ByteString -> Value
 parseJson bs =
-  case runCharParser json "" (T.decodeUtf8 bs) of
-    Left err -> error (show err)
-    Right x -> x
+  case runParser json "" (T.decodeUtf8 bs) of
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
 parseJsonReporter :: ByteString -> Value
 parseJsonReporter bs =
   case runReporter json "" (T.decodeUtf8 bs) of
-    Left err -> error (show err)
-    Right x -> x
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
-json :: Parser Value
+json :: P Value
 json = space *> (object <|> array)
 
-object :: Parser Value
+object :: P Value
 object = Object . H.fromList <$> (char '{' *> space *> sepBy pair (space *> char ',' *> space) <* space <* char '}')
   where pair = liftA2 (,) (jstring <* space) (char ':' *> space *> value)
 
-array :: Parser Value
+array :: P Value
 array = Array . V.fromList <$> (char '[' *> sepBy value (space *> char ',' *> space) <* space <* char ']')
 
-value :: Parser Value
+value :: P Value
 value = do
   (String <$> jstring)
     <|> object
@@ -60,13 +60,13 @@ value = do
     <|> (Null       <$ chunk "null")
     <|> (Number     <$> scientific)
 
-jstring :: Parser Text
+jstring :: P Text
 jstring = char '"' *> asChunk (skipMany $ satisfy (/= '"')) <* char '"'
 
-space :: Parser ()
+space :: P ()
 space = skipMany (satisfy (\c -> c == ' ' || c == '\n' || c == '\t'))
 
-scientific :: Parser Sci.Scientific
+scientific :: P Sci.Scientific
 scientific = do
   neg <- sign
   frac <- fractionDec (pure ())

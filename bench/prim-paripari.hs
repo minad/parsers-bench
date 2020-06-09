@@ -40,11 +40,7 @@ main = defaultMain
   , bparser "decimal" mkInt (const (decimal :: Acceptor Text Integer))
   , bparser "octal" mkInt (const (octal :: Acceptor Text Integer))
   , bparser "hexadecimal" mkInt (const (hexadecimal :: Acceptor Text Integer))
-  , bparser "scientific" mkInt (const (fractionDec (pure ()) :: Acceptor Text (Integer, Int, Integer)))
-  , bparser "takeElementsWhile" manyAs (const $ takeElementsWhile (== 'a'))
-  , bparser "takeElementsWhile1" manyAs (const $ takeElementsWhile (== 'a'))
-  , bparser "skipElementsWhile" manyAs (const $ skipElementsWhile (== 'a'))
-  , bparser "skipElementsWhile1" manyAs (const $ skipElementsWhile (== 'a'))
+  --, bparser "scientific" mkInt (const (fractionDec (pure ()) :: Acceptor Text (Integer, Int, Integer)))
   ]
 
 instance NFData Error

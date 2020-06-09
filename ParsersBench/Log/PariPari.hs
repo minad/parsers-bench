@@ -14,27 +14,27 @@ import Text.PariPari
 import Data.ByteString (ByteString)
 
 type StringType    = ByteString
-type ParserMonad p = CharParser StringType p
-type Parser a      = (forall p. ParserMonad p => p a)
+type PMonad p = Parser StringType p
+type P a      = (forall p. PMonad p => p a)
 
-{-# SPECIALISE_ALL ParserMonad p = p ~ Acceptor StringType #-}
-{-# SPECIALISE_ALL ParserMonad p = p ~ Reporter StringType #-}
-{-# SPECIALISE_ALL Parser = Acceptor StringType #-}
-{-# SPECIALISE_ALL Parser = Reporter StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Acceptor StringType #-}
+{-# SPECIALISE_ALL PMonad p = p ~ Reporter StringType #-}
+{-# SPECIALISE_ALL P = Acceptor StringType #-}
+{-# SPECIALISE_ALL P = Reporter StringType #-}
 
 parseLog :: ByteString -> Log
 parseLog bs =
-  case runCharParser logParser "" bs of
-    Left err -> error (show err)
-    Right x -> x
+  case runParser logParser "" bs of
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
 parseLogReporter :: ByteString -> Log
 parseLogReporter bs =
   case runReporter logParser "" bs of
-    Left err -> error (show err)
-    Right x -> x
+    (Just x, []) -> x
+    (_, err) -> error (show err)
 
-parseIP :: Parser IP
+parseIP :: P IP
 parseIP = do
   d1 <- decimal
   void (char '.')
@@ -45,7 +45,7 @@ parseIP = do
   d4 <- decimal
   return (IP d1 d2 d3 d4)
 
-timeParser :: Parser LocalTime
+timeParser :: P LocalTime
 timeParser = do
   y  <- count 4 $ digitChar 10
   void (char '-')
@@ -63,14 +63,14 @@ timeParser = do
     , localTimeOfDay = TimeOfDay (read h) (read m) (read s)
     }
 
-productParser :: Parser Product
+productParser :: P Product
 productParser =
       (Mouse    <$ chunk "mouse")
   <|> (Keyboard <$ chunk "keyboard")
   <|> (Monitor  <$ chunk "monitor")
   <|> (Speakers <$ chunk "speakers")
 
-logEntryParser :: Parser LogEntry
+logEntryParser :: P LogEntry
 logEntryParser = do
   t <- timeParser
   void (char ' ')
@@ -79,5 +79,5 @@ logEntryParser = do
   p <- productParser
   return (LogEntry t ip p)
 
-logParser :: Parser Log
+logParser :: P Log
 logParser = many (logEntryParser <* char '\n')
