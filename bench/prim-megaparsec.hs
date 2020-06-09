@@ -55,15 +55,15 @@ main = defaultMain
   , bbundle "4 errors" 1000 [1, 500, 1000]
   , bbundle "100 errors" 1000 [10,20..1000]
 
-  , breachOffset 0 1000
-  , breachOffset 0 2000
-  , breachOffset 0 4000
-  , breachOffset 1000 1000
+  --, breachOffset 0 1000
+  --, breachOffset 0 2000
+  --, breachOffset 0 4000
+  --, breachOffset 1000 1000
 
-  , breachOffsetNoLine 0 1000
-  , breachOffsetNoLine 0 2000
-  , breachOffsetNoLine 0 4000
-  , breachOffsetNoLine 1000 1000
+  --, breachOffsetNoLine 0 1000
+  --, breachOffsetNoLine 0 2000
+  --, breachOffsetNoLine 0 4000
+  --, breachOffsetNoLine 1000 1000
 
   ]
 
@@ -109,6 +109,7 @@ bbundle name totalLines sps =
 
 -- | Bench the 'reachOffset' function.
 
+{-
 breachOffset
   :: Int               -- ^ Starting offset in 'PosState'
   -> Int               -- ^ Offset to reach
@@ -147,6 +148,7 @@ breachOffsetNoLine o0 o1 = bench
         , pstateTabWidth = defaultTabWidth
         , pstateLinePrefix = ""
         }
+-}
 
 -- | The series of sizes to try as part of 'bparser'.
 
